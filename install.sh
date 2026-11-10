@@ -113,7 +113,7 @@ mkdir -p "$BINDIR" || die "建不了目录 $BINDIR"
 #
 # 所以中转文件必须落在 $BINDIR 里，不能直接从 $tmp 搬：mktemp -d 常在 /tmp，
 # 而 /tmp 在很多系统上是 tmpfs，跨文件系统的 mv 会退化成"复制再删除"，
-# 中途断掉就留下一个半截的 doppio。先 cp 进 $BINDIR（可以不原子，反正是临时名），
+# 中途断掉就留下一个半截的 doppio。先 cp 进 ${BINDIR}（可以不原子，反正是临时名），
 # 再在同目录内 rename。
 staged="$BINDIR/.doppio.new.$$"
 # 这个中转文件在 $BINDIR 里，$tmp 的 trap 管不到它，得自己兜
@@ -137,12 +137,6 @@ say ""
 legacy="$BINDIR/dazi" # OLD-NAME-OK(SPEC-0010)
 if [ -e "$legacy" ]; then
 	if rm -f "$legacy"; then
-		# ${legacy} 必须带花括号：后面紧跟一个全角括号，而 shell 会把那个字符的
-		# **字节**也当成变量名的一部分 —— 在 set -u 下报 `legacy…: unbound variable`，
-		# 装到一半当场退出。这一行只在机器上确实有改名前的旧二进制时才跑到，所以
-		# 它一路没被发现：新机器装得好，而**老用户每一次升级都踩**（而且是在旧二进制
-		# 已经删掉之后、还没核对新命令之前，脚本以非零退出，照着做的 Agent 会报
-		# 「装不上」然后停下）。
 		say "已删掉改名前的 ${legacy}（现在的命令叫 doppio）"
 	else
 		# 删不掉也要说出来，不能装作没这回事：留着它的人会以为两个都能用。
