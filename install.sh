@@ -137,7 +137,13 @@ say ""
 legacy="$BINDIR/dazi" # OLD-NAME-OK(SPEC-0010)
 if [ -e "$legacy" ]; then
 	if rm -f "$legacy"; then
-		say "已删掉改名前的 $legacy（现在的命令叫 doppio）"
+		# ${legacy} 必须带花括号：后面紧跟一个全角括号，而 shell 会把那个字符的
+		# **字节**也当成变量名的一部分 —— 在 set -u 下报 `legacy…: unbound variable`，
+		# 装到一半当场退出。这一行只在机器上确实有改名前的旧二进制时才跑到，所以
+		# 它一路没被发现：新机器装得好，而**老用户每一次升级都踩**（而且是在旧二进制
+		# 已经删掉之后、还没核对新命令之前，脚本以非零退出，照着做的 Agent 会报
+		# 「装不上」然后停下）。
+		say "已删掉改名前的 ${legacy}（现在的命令叫 doppio）"
 	else
 		# 删不掉也要说出来，不能装作没这回事：留着它的人会以为两个都能用。
 		say "⚠ 删不掉改名前的 $legacy —— 请手动删除。"
