@@ -153,41 +153,30 @@ else
       $BINDIR/doppio version"
 fi
 
+# 结尾只说一件事：下一条命令是什么。
+#
+# 照「交给我的 Agent」那一句话跑这个脚本的是 Agent（SPEC-0018 M-2），所以这里印的
+# 东西也是教给 Agent 的东西。原先这里印的是注册、登录、签发入列码那几条 ——
+# 人类在自己机器上入列的旧路，和那一句话说的是两套（#193）。现在只指向 guide，
+# 接下来怎么走由它按这台机器的状态去说。
+#
+# 最后一行带全路径：装到的目录不在 PATH 里时，那一句话说的「再运行上面那一条」
+# 会再失败一次，而原先的提示埋在一长段输出中间。
 case ":$PATH:" in
-*":$BINDIR:"*) ;;
-*)
-	say ""
-	say "把它加进 PATH（当前 shell 没有 ${BINDIR}）："
-	say "  export PATH=\"$BINDIR:\$PATH\""
-	;;
+*":$BINDIR:"*) ON_PATH=1 ;;
+*) ON_PATH=0 ;;
 esac
 
-cat <<'NEXT'
-
-接下来（都不需要管理员权限，数据在 ~/.doppio）：
-
-  doppio init                          # 建本机数据目录
-  doppio doctor --skip gaps            # 宪法各条文的可执行检查，应全绿
-  doppio agent brief                   # 这条是专门打印给 LLM Agent 读的操作说明
-
-连一个中枢（比如朋友或团队起的）—— 地址只在登录时给一次：
-  doppio hub ping  --hub https://hub.example.com
-  doppio register  --hub https://hub.example.com --email you@example.com
-  doppio login     --hub https://hub.example.com --email you@example.com
-  doppio whoami                                    # 要显示 mode remote，否则就是没连上
-  doppio agent enroll-init --kind claude-code      # 人类签发入列码（地址已记下，不用再带）
-  doppio agent enroll --code <码> --skill go       # Agent 侧入列，私钥只留本机
-
-  login 把中枢地址记进 ~/.doppio/<profile>/session，之后的命令自己读回来。
-  优先级：--hub > DOPPIO_HUB > session 里记的 > 都没有就用本机库。
-
-给你的 AI Agent 装一份操作手册（它照着就能接活、交付、闭环）：
-  mkdir -p ~/.claude/skills/doppio
-  doppio agent brief --format skill > ~/.claude/skills/doppio/SKILL.md
-
-自己起一个中枢：
-  doppio hub serve --addr 0.0.0.0:8443 \
-    --tls-cert cert.pem --tls-key key.pem --trust-proxy cloudflare
-
-一切能力都在原子操作层，`doppio ops list` 同时就是 HTTP 接口的文档。
-NEXT
+say ""
+say "下一步：回到你的人交给你的那件事上 —— 把他给你的那条 doppio guide … 再跑一次。"
+say "他没给那一条，就跑下面这一条，它会按这台机器现在的状态告诉你接下来怎么走："
+say ""
+say "    $BINDIR/doppio guide"
+if [ "$ON_PATH" = 0 ]; then
+	say ""
+	say "⚠ 当前 shell 的 PATH 里没有 ${BINDIR}，直接敲 doppio 会报找不到命令。两个办法任选："
+	say "    · 把命令开头的 doppio 换成全路径：$BINDIR/doppio guide …"
+	say "    · 或者在同一行前面加上：export PATH=\"$BINDIR:\$PATH\";"
+fi
+say ""
+say "全部命令：$BINDIR/doppio --help"
